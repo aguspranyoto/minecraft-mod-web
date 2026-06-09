@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
 import { UserProfileButton } from "@/components/user-profile-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 interface Product {
   id: number;
@@ -26,7 +27,7 @@ export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "premium" | "free">(
-    "all"
+    "all",
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -56,7 +57,7 @@ export default function HomePage() {
       result = result.filter(
         (p) =>
           p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+          p.description?.toLowerCase().includes(searchQuery.toLowerCase()),
       );
     }
 
@@ -72,7 +73,7 @@ export default function HomePage() {
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
-    currentPage * ITEMS_PER_PAGE
+    currentPage * ITEMS_PER_PAGE,
   );
 
   // Extract first image from HTML content for cover
@@ -92,13 +93,16 @@ export default function HomePage() {
       <header className="relative">
         {/* Banner */}
         <div className="relative h-48 overflow-hidden sm:h-64 md:h-72 lg:h-80">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-amber-600/20 to-neutral-900" />
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-amber-600/20 to-neutral-200 dark:to-neutral-900" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
 
           {/* Top nav bar */}
           <div className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <div />
-            <UserProfileButton />
+            <div className="flex items-center gap-3">
+              <ThemeToggle />
+              <UserProfileButton />
+            </div>
           </div>
         </div>
 
@@ -108,18 +112,18 @@ export default function HomePage() {
             {/* Avatar */}
             <div className="relative">
               <div className="h-28 w-28 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 p-1 shadow-2xl shadow-orange-500/20 sm:h-32 sm:w-32">
-                <div className="flex h-full w-full items-center justify-center rounded-full bg-neutral-900 text-4xl font-bold text-orange-400">
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-white dark:bg-neutral-900 text-4xl font-bold text-orange-400">
                   A
                 </div>
               </div>
             </div>
 
             {/* Creator info */}
-            <h1 className="mt-4 text-2xl font-bold text-white sm:text-3xl">
-              Agus Mods
+            <h1 className="mt-4 text-2xl font-bold text-foreground sm:text-3xl">
+              Aguud
             </h1>
-            <p className="mt-1 text-sm text-neutral-400">
-              Premium Minecraft Mods & Resource Packs
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+              Premium Minecraft Mods
             </p>
             <div className="mt-2 flex items-center gap-3 text-xs text-neutral-500">
               <span>{products.length} mods</span>
@@ -128,7 +132,11 @@ export default function HomePage() {
             </div>
 
             {/* Become member button */}
-            <Button className="mt-4 gap-2 px-8" size="lg" id="become-member-button">
+            <Button
+              className="mt-4 gap-2 px-8"
+              size="lg"
+              id="become-member-button"
+            >
               <Crown className="h-4 w-4" />
               Become a member
             </Button>
@@ -161,12 +169,12 @@ export default function HomePage() {
 
           {/* Search */}
           <div className="relative ml-auto w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="Search mods"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9"
+              className="pl-9 text-foreground placeholder-foreground"
               id="search-input"
             />
           </div>
@@ -180,12 +188,12 @@ export default function HomePage() {
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="animate-pulse rounded-xl border border-neutral-800 bg-neutral-900"
+                className="animate-pulse rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-900"
               >
-                <div className="aspect-[4/3] rounded-t-xl bg-neutral-800" />
+                <div className="aspect-[4/3] rounded-t-xl bg-neutral-200 dark:bg-neutral-800" />
                 <div className="p-3 space-y-2">
-                  <div className="h-4 w-3/4 rounded bg-neutral-800" />
-                  <div className="h-3 w-1/2 rounded bg-neutral-800" />
+                  <div className="h-4 w-3/4 rounded bg-neutral-200 dark:bg-neutral-800" />
+                  <div className="h-3 w-1/2 rounded bg-neutral-200 dark:bg-neutral-800" />
                 </div>
               </div>
             ))}
@@ -193,7 +201,7 @@ export default function HomePage() {
         ) : paginatedProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="text-6xl">🎮</div>
-            <h3 className="mt-4 text-lg font-semibold text-neutral-300">
+            <h3 className="mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-300">
               No mods found
             </h3>
             <p className="mt-1 text-sm text-neutral-500">
@@ -209,10 +217,10 @@ export default function HomePage() {
                   <Link
                     key={product.id}
                     href={`/product/${product.slug}`}
-                    className="group overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/50 transition-all duration-300 hover:border-neutral-700 hover:bg-neutral-900 hover:shadow-xl hover:shadow-orange-500/5 hover:-translate-y-1"
+                    className="group overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white/50 dark:bg-neutral-900/50 transition-all duration-300 hover:border-neutral-300 dark:hover:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-900 hover:shadow-xl hover:shadow-orange-500/5 hover:-translate-y-1"
                   >
                     {/* Cover image */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-neutral-800">
+                    <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100 dark:bg-neutral-800">
                       {coverImage ? (
                         <img
                           src={coverImage}
@@ -220,7 +228,7 @@ export default function HomePage() {
                           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900">
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-800 dark:to-neutral-900">
                           <span className="text-4xl">🧊</span>
                         </div>
                       )}
@@ -235,7 +243,7 @@ export default function HomePage() {
 
                     {/* Card content */}
                     <div className="p-3">
-                      <h3 className="line-clamp-1 text-sm font-semibold text-white group-hover:text-orange-400 transition-colors">
+                      <h3 className="line-clamp-1 text-sm font-semibold text-neutral-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
                         {product.title}
                       </h3>
                       {product.description && (
@@ -278,7 +286,7 @@ export default function HomePage() {
       {/* ─── Footer ─── */}
       <footer className="border-t border-neutral-800 py-6">
         <div className="mx-auto max-w-5xl px-4 text-center text-xs text-neutral-600 sm:px-6 lg:px-8">
-          © {new Date().getFullYear()} Agus Mods. All rights reserved.
+          © {new Date().getFullYear()} Aguud. All rights reserved.
         </div>
       </footer>
     </div>

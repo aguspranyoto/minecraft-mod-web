@@ -7,6 +7,7 @@ import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserProfileButton } from "@/components/user-profile-button";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth-modal";
 import { toast } from "sonner";
 
@@ -36,7 +37,8 @@ export default function ProductDetailClient({
   // TODO: Check active subscription from server
   const hasActiveSubscription = false;
 
-  const canDownload = isLoggedIn && (!product.isPremium || hasActiveSubscription);
+  const canDownload =
+    isLoggedIn && (!product.isPremium || hasActiveSubscription);
 
   const handleDownload = async (fileUrl: string) => {
     if (!isLoggedIn) {
@@ -46,7 +48,7 @@ export default function ProductDetailClient({
 
     if (product.isPremium && !hasActiveSubscription) {
       toast.error(
-        "You need an active subscription to download premium mods. Subscribe to get 30-day access!"
+        "You need an active subscription to download premium mods. Subscribe to get 30-day access!",
       );
       return;
     }
@@ -54,7 +56,7 @@ export default function ProductDetailClient({
     setDownloading(fileUrl);
     try {
       const res = await fetch(
-        `/api/download?file=${encodeURIComponent(fileUrl)}`
+        `/api/download?file=${encodeURIComponent(fileUrl)}`,
       );
       if (res.ok) {
         const data = await res.json();
@@ -77,16 +79,19 @@ export default function ProductDetailClient({
   return (
     <div className="min-h-screen">
       {/* ─── Top Navigation Bar ─── */}
-      <nav className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md">
+      <nav className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6">
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm text-neutral-400 transition-colors hover:text-white"
+            className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:text-black dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to all mods
           </Link>
-          <UserProfileButton />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <UserProfileButton />
+          </div>
         </div>
       </nav>
 
@@ -94,10 +99,13 @@ export default function ProductDetailClient({
       <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
         {/* Title & badge */}
         <div className="flex flex-wrap items-start gap-3">
-          <h1 className="text-2xl font-bold text-white sm:text-3xl">
+          <h1 className="text-2xl font-bold text-neutral-900 dark:text-white sm:text-3xl">
             {product.title}
           </h1>
-          <Badge variant={product.isPremium ? "premium" : "free"} className="mt-1">
+          <Badge
+            variant={product.isPremium ? "premium" : "free"}
+            className="mt-1"
+          >
             {product.isPremium ? (
               <>
                 <Crown className="mr-1 h-3 w-3" />
@@ -110,7 +118,7 @@ export default function ProductDetailClient({
         </div>
 
         {product.description && (
-          <p className="mt-2 text-neutral-400">{product.description}</p>
+          <p className="mt-2 text-neutral-600 dark:text-neutral-400">{product.description}</p>
         )}
 
         <div className="mt-1 text-xs text-neutral-600">
@@ -125,15 +133,15 @@ export default function ProductDetailClient({
         {/* ─── Content (TipTap HTML rendered with Typography) ─── */}
         {product.content && (
           <article
-            className="prose prose-invert prose-orange mt-8 max-w-none prose-headings:text-white prose-p:text-neutral-300 prose-a:text-orange-400 prose-strong:text-white prose-img:rounded-xl prose-img:border prose-img:border-neutral-800"
+            className="prose dark:prose-invert prose-orange mt-8 max-w-none prose-headings:text-neutral-900 dark:prose-headings:text-white prose-p:text-neutral-700 dark:prose-p:text-neutral-300 prose-a:text-orange-400 prose-strong:text-neutral-900 dark:prose-strong:text-white prose-img:rounded-xl prose-img:border prose-img:border-neutral-200 dark:prose-img:border-neutral-800"
             dangerouslySetInnerHTML={{ __html: product.content }}
           />
         )}
 
         {/* ─── Download Section ─── */}
         {product.files && product.files.length > 0 && (
-          <section className="mt-12 rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
-            <h2 className="flex items-center gap-2 text-lg font-semibold text-white">
+          <section className="mt-12 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 p-6">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-neutral-900 dark:text-white">
               <Download className="h-5 w-5 text-orange-400" />
               Downloads
               {product.isPremium && !hasActiveSubscription && (
@@ -198,7 +206,7 @@ export default function ProductDetailClient({
       {/* Footer */}
       <footer className="mt-auto border-t border-neutral-800 py-6">
         <div className="mx-auto max-w-4xl px-4 text-center text-xs text-neutral-600 sm:px-6">
-          © {new Date().getFullYear()} Agus Mods. All rights reserved.
+          © {new Date().getFullYear()} Aguud. All rights reserved.
         </div>
       </footer>
     </div>

@@ -47,6 +47,13 @@ A custom Next.js web application functioning as a private Patreon clone. The pla
   - **Admin:** Determined by matching the user's email with `ADMIN_EMAIL` (which is `agusprnyt@gmail.com`) in the environment variables.
   - **User:** All other registered emails.
 
+### Theme Switcher (Dark / Light Mode)
+
+- **Global Theme Toggle:** Provide a toggle button in the header/navigation to let users switch between Dark and Light mode.
+- **Persistence:** Save the selected theme in `localStorage` and apply the class to the document root element.
+- **Default Theme:** Default to Dark mode (to fit the Minecraft/premium gaming aesthetic), but gracefully support Light mode.
+- **Tailwind Integration:** Ensure components use Tailwind's `dark:` selectors or variables for seamless transition between light and dark themes.
+
 ### Admin Dashboard & Product CRUD (`/admin`)
 
 - Accessible only to the Admin.

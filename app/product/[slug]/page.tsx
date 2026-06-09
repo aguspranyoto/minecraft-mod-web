@@ -28,11 +28,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ogImage = p.content?.match(/<img[^>]+src="([^"]+)"/)?.[1];
 
   return {
-    title: `${p.title} | Minecraft Mods by Agus`,
-    description: p.description || `Download ${p.title} - a Minecraft mod by Agus.`,
+    title: `${p.title} | Premium Minecraft Mods by Aguud`,
+    description:
+      p.description ||
+      `Download ${p.title} - a Premium Minecraft mod by Aguud.`,
     openGraph: {
       title: p.title,
-      description: p.description || `Download ${p.title} - a Minecraft mod by Agus.`,
+      description:
+        p.description ||
+        `Download ${p.title} - a Premium Minecraft mod by Aguud.`,
       type: "article",
       ...(ogImage && { images: [{ url: ogImage }] }),
     },
@@ -52,5 +56,7 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
-  return <ProductDetailClient product={JSON.parse(JSON.stringify(product[0]))} />;
+  return (
+    <ProductDetailClient product={JSON.parse(JSON.stringify(product[0]))} />
+  );
 }

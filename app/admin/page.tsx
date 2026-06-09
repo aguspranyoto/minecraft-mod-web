@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { MediaManager } from "@/components/media-manager";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Plus,
   Pencil,
@@ -190,9 +191,9 @@ export default function AdminPage() {
   // ─── Product Editor View ─────────────────────────────────────
   if (editingProduct) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a]">
+      <div className="min-h-screen bg-background">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md">
+        <div className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
           <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
             <Button
               variant="ghost"
@@ -206,6 +207,7 @@ export default function AdminPage() {
               Cancel
             </Button>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <Button
                 onClick={handleSave}
                 disabled={saving}
@@ -389,9 +391,9 @@ export default function AdminPage() {
 
   // ─── Product List View ───────────────────────────────────────
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background">
       {/* Top bar */}
-      <div className="sticky top-0 z-40 border-b border-neutral-800 bg-neutral-900/80 backdrop-blur-md">
+      <div className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link
             href="/"
@@ -400,11 +402,14 @@ export default function AdminPage() {
             <ArrowLeft className="h-4 w-4" />
             Back to Site
           </Link>
-          <h1 className="text-lg font-semibold text-white">Admin Dashboard</h1>
-          <Button onClick={handleCreate} size="sm" className="gap-2">
-            <Plus className="h-4 w-4" />
-            New Product
-          </Button>
+          <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Admin Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <Button onClick={handleCreate} size="sm" className="gap-2">
+              <Plus className="h-4 w-4" />
+              New Product
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -414,7 +419,7 @@ export default function AdminPage() {
             {Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
-                className="h-16 animate-pulse rounded-lg bg-neutral-800/50"
+                className="h-16 animate-pulse rounded-lg bg-neutral-100 dark:bg-neutral-800/50"
               />
             ))}
           </div>
@@ -437,12 +442,12 @@ export default function AdminPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/50 px-4 py-3 transition-colors hover:bg-neutral-900"
+                className="flex items-center justify-between rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 px-4 py-3 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900"
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-white truncate">
+                      <h3 className="font-medium text-neutral-900 dark:text-white truncate">
                         {product.title}
                       </h3>
                       <Badge

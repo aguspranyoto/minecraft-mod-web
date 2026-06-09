@@ -39,7 +39,7 @@ export function UserProfileButton({
         <Button
           variant="outline"
           onClick={() => setAuthModalOpen(true)}
-          className="gap-2"
+          className="gap-2 hover:bg-transparent!"
           id="login-button"
         >
           <User className="h-4 w-4" />
@@ -56,11 +56,7 @@ export function UserProfileButton({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          className="gap-2 px-2"
-          id="user-profile-button"
-        >
+        <Button variant="ghost" className="gap-2 px-2" id="user-profile-button">
           {user.image ? (
             <img
               src={user.image}
