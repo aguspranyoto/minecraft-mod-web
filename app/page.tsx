@@ -1,65 +1,286 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { Search, SlidersHorizontal, Crown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Pagination } from "@/components/ui/pagination";
+import { UserProfileButton } from "@/components/user-profile-button";
+
+interface Product {
+  id: number;
+  title: string;
+  slug: string;
+  description: string | null;
+  content: string | null;
+  isPremium: boolean;
+  files: string[];
+  createdAt: string;
+}
+
+const ITEMS_PER_PAGE = 8;
+
+export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "premium" | "free">(
+    "all"
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    try {
+      const res = await fetch("/api/products");
+      if (res.ok) {
+        const data = await res.json();
+        setProducts(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredProducts = useMemo(() => {
+    let result = products;
+
+    if (searchQuery) {
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    if (filterType === "premium") {
+      result = result.filter((p) => p.isPremium);
+    } else if (filterType === "free") {
+      result = result.filter((p) => !p.isPremium);
+    }
+
+    return result;
+  }, [products, searchQuery, filterType]);
+
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+  const paginatedProducts = filteredProducts.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  // Extract first image from HTML content for cover
+  const extractCoverImage = (content: string | null): string | null => {
+    if (!content) return null;
+    const match = content.match(/<img[^>]+src="([^"]+)"/);
+    return match ? match[1] : null;
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterType]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="flex min-h-screen flex-col">
+      {/* ─── Hero Section (Patreon-style) ─── */}
+      <header className="relative">
+        {/* Banner */}
+        <div className="relative h-48 overflow-hidden sm:h-64 md:h-72 lg:h-80">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-amber-600/20 to-neutral-900" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
+
+          {/* Top nav bar */}
+          <div className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+            <div />
+            <UserProfileButton />
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Profile section */}
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+          <div className="-mt-16 flex flex-col items-center sm:-mt-20">
+            {/* Avatar */}
+            <div className="relative">
+              <div className="h-28 w-28 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 p-1 shadow-2xl shadow-orange-500/20 sm:h-32 sm:w-32">
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-neutral-900 text-4xl font-bold text-orange-400">
+                  A
+                </div>
+              </div>
+            </div>
+
+            {/* Creator info */}
+            <h1 className="mt-4 text-2xl font-bold text-white sm:text-3xl">
+              Agus Mods
+            </h1>
+            <p className="mt-1 text-sm text-neutral-400">
+              Premium Minecraft Mods & Resource Packs
+            </p>
+            <div className="mt-2 flex items-center gap-3 text-xs text-neutral-500">
+              <span>{products.length} mods</span>
+              <span>•</span>
+              <span>Java Edition</span>
+            </div>
+
+            {/* Become member button */}
+            <Button className="mt-4 gap-2 px-8" size="lg" id="become-member-button">
+              <Crown className="h-4 w-4" />
+              Become a member
+            </Button>
+          </div>
+        </div>
+      </header>
+
+      {/* ─── Filter & Search Section ─── */}
+      <section className="mx-auto mt-10 w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Filter buttons */}
+          <div className="flex items-center gap-2">
+            {(["all", "premium", "free"] as const).map((type) => (
+              <Button
+                key={type}
+                variant={filterType === type ? "default" : "outline"}
+                size="sm"
+                onClick={() => setFilterType(type)}
+                className="capitalize"
+              >
+                {type === "all" ? "All Mods" : type}
+              </Button>
+            ))}
+          </div>
+
+          {/* Sort icon */}
+          <Button variant="outline" size="icon" className="h-8 w-8">
+            <SlidersHorizontal className="h-4 w-4" />
+          </Button>
+
+          {/* Search */}
+          <div className="relative ml-auto w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+            <Input
+              placeholder="Search mods"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+              id="search-input"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
-      </main>
+      </section>
+
+      {/* ─── Product Grid ─── */}
+      <section className="mx-auto mt-8 w-full max-w-5xl flex-1 px-4 sm:px-6 lg:px-8">
+        {loading ? (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="animate-pulse rounded-xl border border-neutral-800 bg-neutral-900"
+              >
+                <div className="aspect-[4/3] rounded-t-xl bg-neutral-800" />
+                <div className="p-3 space-y-2">
+                  <div className="h-4 w-3/4 rounded bg-neutral-800" />
+                  <div className="h-3 w-1/2 rounded bg-neutral-800" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : paginatedProducts.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="text-6xl">🎮</div>
+            <h3 className="mt-4 text-lg font-semibold text-neutral-300">
+              No mods found
+            </h3>
+            <p className="mt-1 text-sm text-neutral-500">
+              Try adjusting your search or filters.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {paginatedProducts.map((product) => {
+                const coverImage = extractCoverImage(product.content);
+                return (
+                  <Link
+                    key={product.id}
+                    href={`/product/${product.slug}`}
+                    className="group overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900/50 transition-all duration-300 hover:border-neutral-700 hover:bg-neutral-900 hover:shadow-xl hover:shadow-orange-500/5 hover:-translate-y-1"
+                  >
+                    {/* Cover image */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-neutral-800">
+                      {coverImage ? (
+                        <img
+                          src={coverImage}
+                          alt={product.title}
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-neutral-800 to-neutral-900">
+                          <span className="text-4xl">🧊</span>
+                        </div>
+                      )}
+
+                      {/* Premium/Free badge */}
+                      <div className="absolute right-2 top-2">
+                        <Badge variant={product.isPremium ? "premium" : "free"}>
+                          {product.isPremium ? "Premium" : "Free"}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Card content */}
+                    <div className="p-3">
+                      <h3 className="line-clamp-1 text-sm font-semibold text-white group-hover:text-orange-400 transition-colors">
+                        {product.title}
+                      </h3>
+                      {product.description && (
+                        <p className="mt-1 line-clamp-2 text-xs text-neutral-500">
+                          {product.description}
+                        </p>
+                      )}
+                      <div className="mt-2 flex items-center gap-2 text-xs text-neutral-600">
+                        <span>
+                          {new Date(product.createdAt).toLocaleDateString()}
+                        </span>
+                        {product.files && product.files.length > 0 && (
+                          <>
+                            <span>•</span>
+                            <span>
+                              {product.files.length} file
+                              {product.files.length > 1 ? "s" : ""}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-8 pb-8">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="border-t border-neutral-800 py-6">
+        <div className="mx-auto max-w-5xl px-4 text-center text-xs text-neutral-600 sm:px-6 lg:px-8">
+          © {new Date().getFullYear()} Agus Mods. All rights reserved.
+        </div>
+      </footer>
     </div>
   );
 }
