@@ -81,7 +81,7 @@ export function UserProfileButton({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="flex flex-col gap-1">
-          <span className="text-sm font-medium text-white">{user.name}</span>
+          <span className="text-sm font-medium text-neutral-200">{user.name}</span>
           <span className="text-xs text-neutral-500">{user.email}</span>
           {hasActiveSubscription && (
             <Badge variant="premium" className="w-fit mt-1">

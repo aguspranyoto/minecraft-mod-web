@@ -24,21 +24,66 @@ interface Product {
 
 interface ProductDetailClientProps {
   product: Product;
+  hasActiveSubscription?: boolean;
 }
 
 export default function ProductDetailClient({
   product,
+  hasActiveSubscription = false,
 }: ProductDetailClientProps) {
   const { data: session } = useSession();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [subscribing, setSubscribing] = useState(false);
 
   const isLoggedIn = !!session;
-  // TODO: Check active subscription from server
-  const hasActiveSubscription = false;
 
   const canDownload =
     isLoggedIn && (!product.isPremium || hasActiveSubscription);
+
+  const handleSubscribe = async () => {
+    if (!isLoggedIn) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    try {
+      setSubscribing(true);
+      const res = await fetch("/api/subscription", { method: "POST" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create transaction");
+      }
+
+      // Open Midtrans Snap UI
+      if (typeof window !== "undefined" && (window as any).snap) {
+        (window as any).snap.pay(data.token, {
+          onSuccess: function (result: any) {
+            toast.success("Payment successful! You now have access.");
+            window.location.reload(); // Reload to get updated subscription status
+          },
+          onPending: function (result: any) {
+            toast.info("Waiting for your payment.");
+          },
+          onError: function (result: any) {
+            toast.error("Payment failed.");
+            setSubscribing(false);
+          },
+          onClose: function () {
+            toast.info("You closed the payment window.");
+            setSubscribing(false);
+          },
+        });
+      } else {
+        toast.error("Payment system is not ready yet.");
+        setSubscribing(false);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      setSubscribing(false);
+    }
+  };
 
   const handleDownload = async (fileUrl: string) => {
     if (!isLoggedIn) {
@@ -47,9 +92,8 @@ export default function ProductDetailClient({
     }
 
     if (product.isPremium && !hasActiveSubscription) {
-      toast.error(
-        "You need an active subscription to download premium mods. Subscribe to get 30-day access!",
-      );
+      // Trigger subscribe instead of just erroring
+      handleSubscribe();
       return;
     }
 
@@ -171,10 +215,12 @@ export default function ProductDetailClient({
                     size="sm"
                     variant={canDownload ? "default" : "outline"}
                     onClick={() => handleDownload(fileUrl)}
-                    disabled={downloading === fileUrl}
+                    disabled={downloading === fileUrl || subscribing}
                     className="shrink-0"
                   >
                     {downloading === fileUrl ? (
+                      <span className="animate-spin">⏳</span>
+                    ) : subscribing && product.isPremium && !hasActiveSubscription ? (
                       <span className="animate-spin">⏳</span>
                     ) : !isLoggedIn ? (
                       <>

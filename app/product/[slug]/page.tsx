@@ -1,9 +1,11 @@
 import { db } from "@/lib/db";
-import { products } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
+import { products, subscriptions } from "@/lib/db/schema";
+import { eq, and, gt } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ProductDetailClient from "./product-detail-client";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -56,7 +58,34 @@ export default async function ProductDetailPage({ params }: Props) {
     notFound();
   }
 
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  let hasActiveSubscription = false;
+
+  if (session?.user?.id) {
+    const activeSub = await db
+      .select()
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.userId, session.user.id),
+          eq(subscriptions.status, "active"),
+          gt(subscriptions.expiresAt, new Date())
+        )
+      )
+      .limit(1);
+
+    if (activeSub.length > 0) {
+      hasActiveSubscription = true;
+    }
+  }
+
   return (
-    <ProductDetailClient product={JSON.parse(JSON.stringify(product[0]))} />
+    <ProductDetailClient 
+      product={JSON.parse(JSON.stringify(product[0]))} 
+      hasActiveSubscription={hasActiveSubscription}
+    />
   );
 }

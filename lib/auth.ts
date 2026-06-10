@@ -28,18 +28,21 @@ export const auth = betterAuth({
       },
     },
   },
-  callbacks: {
-    async onUserCreated({ user }: { user: { id: string; email: string; name: string } }) {
-      // Assign admin role if email matches ADMIN_EMAIL
-      if (user.email === process.env.ADMIN_EMAIL) {
-        const { db: database } = await import("@/lib/db");
-        const { users } = await import("@/lib/db/schema");
-        const { eq } = await import("drizzle-orm");
-        await database
-          .update(users)
-          .set({ role: "admin" })
-          .where(eq(users.id, user.id));
-      }
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user) => {
+          if (user.email === process.env.ADMIN_EMAIL) {
+            const { db: database } = await import("@/lib/db");
+            const { users } = await import("@/lib/db/schema");
+            const { eq } = await import("drizzle-orm");
+            await database
+              .update(users)
+              .set({ role: "admin" })
+              .where(eq(users.id, user.id));
+          }
+        },
+      },
     },
   },
 });

@@ -9,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
 import { UserProfileButton } from "@/components/user-profile-button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AuthModal } from "@/components/auth-modal";
+import { useSession } from "@/lib/auth-client";
+import { toast } from "sonner";
 
 interface Product {
   id: number;
@@ -24,6 +27,7 @@ interface Product {
 const ITEMS_PER_PAGE = 8;
 
 export default function HomePage() {
+  const { data: session } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<"all" | "premium" | "free">(
@@ -31,10 +35,58 @@ export default function HomePage() {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+
+  const isLoggedIn = !!session;
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  const handleSubscribe = async () => {
+    if (!isLoggedIn) {
+      setAuthModalOpen(true);
+      return;
+    }
+
+    try {
+      setSubscribing(true);
+      const res = await fetch("/api/subscription", { method: "POST" });
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to create transaction");
+      }
+
+      // Open Midtrans Snap UI
+      if (typeof window !== "undefined" && (window as any).snap) {
+        (window as any).snap.pay(data.token, {
+          onSuccess: function (result: any) {
+            toast.success("Payment successful! You now have access.");
+            window.location.reload(); // Reload to get updated subscription status
+          },
+          onPending: function (result: any) {
+            toast.info("Waiting for your payment.");
+          },
+          onError: function (result: any) {
+            toast.error("Payment failed.");
+            setSubscribing(false);
+          },
+          onClose: function () {
+            toast.info("You closed the payment window.");
+            setSubscribing(false);
+          },
+        });
+      } else {
+        toast.error("Payment system is not ready yet.");
+        setSubscribing(false);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+      setSubscribing(false);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -89,21 +141,25 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {/* ─── Top Navigation Bar ─── */}
+      <nav className="fixed w-full top-0 z-50 bg-transparent">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <div className="text-sm font-bold text-neutral-900 dark:text-white">
+            Aguud Mods
+          </div>
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <UserProfileButton />
+          </div>
+        </div>
+      </nav>
+
       {/* ─── Hero Section (Patreon-style) ─── */}
       <header className="relative">
         {/* Banner */}
         <div className="relative h-48 overflow-hidden sm:h-64 md:h-72 lg:h-80">
           <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-amber-600/20 to-neutral-200 dark:to-neutral-900" />
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
-
-          {/* Top nav bar */}
-          <div className="relative z-10 flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-            <div />
-            <div className="flex items-center gap-3">
-              <ThemeToggle />
-              <UserProfileButton />
-            </div>
-          </div>
         </div>
 
         {/* Profile section */}
@@ -136,9 +192,15 @@ export default function HomePage() {
               className="mt-4 gap-2 px-8"
               size="lg"
               id="become-member-button"
+              onClick={handleSubscribe}
+              disabled={subscribing}
             >
-              <Crown className="h-4 w-4" />
-              Become a member
+              {subscribing ? (
+                <span className="animate-spin">⏳</span>
+              ) : (
+                <Crown className="h-4 w-4" />
+              )}
+              {subscribing ? "Processing..." : "Become a member"}
             </Button>
           </div>
         </div>
@@ -289,6 +351,9 @@ export default function HomePage() {
           © {new Date().getFullYear()} Aguud. All rights reserved.
         </div>
       </footer>
+      
+      {/* Auth Modal */}
+      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 }
