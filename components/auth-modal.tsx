@@ -27,7 +27,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl">
+          <DialogTitle className="text-center text-foreground text-2xl">
             Welcome Back
           </DialogTitle>
           <DialogDescription className="text-center">
@@ -41,7 +41,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             onClick={handleGoogleLogin}
             variant="outline"
             size="lg"
-            className="w-full gap-3 border-neutral-700 bg-neutral-800/50 hover:bg-neutral-800 text-white"
+            className="w-full gap-3 border-neutral-700 bg-neutral-800/50 text-neutral-300"
             id="google-login-button"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">

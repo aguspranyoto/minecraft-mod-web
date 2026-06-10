@@ -39,7 +39,7 @@ export function UserProfileButton({
         <Button
           variant="outline"
           onClick={() => setAuthModalOpen(true)}
-          className="gap-2 hover:bg-transparent!"
+          className="gap-2 hover:bg-transparent! hover:text-foreground"
           id="login-button"
         >
           <User className="h-4 w-4" />

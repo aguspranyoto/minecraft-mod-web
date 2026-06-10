@@ -201,7 +201,7 @@ export default function HomePage() {
         ) : paginatedProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="text-6xl">🎮</div>
-            <h3 className="mt-4 text-lg font-semibold text-neutral-900 dark:text-neutral-300">
+            <h3 className="mt-4 text-lg font-semibold text-neutral-300">
               No mods found
             </h3>
             <p className="mt-1 text-sm text-neutral-500">
