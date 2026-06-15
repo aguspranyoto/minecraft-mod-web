@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSession, signOut } from "@/lib/auth-client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,15 +17,23 @@ import { User, LogOut, Shield, Crown } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-interface UserProfileButtonProps {
-  hasActiveSubscription?: boolean;
-}
-
-export function UserProfileButton({
-  hasActiveSubscription,
-}: UserProfileButtonProps) {
+export function UserProfileButton() {
   const { data: session, isPending } = useSession();
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [subscription, setSubscription] = useState<any>(null);
+
+  useEffect(() => {
+    if (session?.user) {
+      fetch("/api/subscription")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.hasActiveSubscription) {
+            setSubscription(data.subscription);
+          }
+        })
+        .catch(console.error);
+    }
+  }, [session]);
 
   if (isPending) {
     return (
@@ -57,6 +65,11 @@ export function UserProfileButton({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="gap-2 px-2" id="user-profile-button">
+          {subscription && (
+            <div title={`You are a member until ${new Date(subscription.expiresAt).toLocaleDateString()}`}>
+              <Crown className="h-5 w-5 text-orange-400" />
+            </div>
+          )}
           {user.image ? (
             <img
               src={user.image}
@@ -71,19 +84,13 @@ export function UserProfileButton({
           <span className="hidden text-sm font-medium text-neutral-200 sm:inline-block">
             {user.name}
           </span>
-          {hasActiveSubscription && (
-            <Badge variant="premium" className="hidden sm:inline-flex">
-              <Crown className="mr-1 h-3 w-3" />
-              Premium
-            </Badge>
-          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel className="flex flex-col gap-1">
           <span className="text-sm font-medium text-neutral-200">{user.name}</span>
           <span className="text-xs text-neutral-500">{user.email}</span>
-          {hasActiveSubscription && (
+          {subscription && (
             <Badge variant="premium" className="w-fit mt-1">
               <Crown className="mr-1 h-3 w-3" />
               Premium User

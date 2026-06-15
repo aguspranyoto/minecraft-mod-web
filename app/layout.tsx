@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
-import { ThemeProvider } from "@/components/theme-provider";
 import Script from "next/script";
 import "./globals.css";
 
@@ -35,43 +34,24 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
       <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var theme = localStorage.getItem('theme') || 'dark';
-                  if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
-      <body className="min-h-full flex flex-col bg-white dark:bg-[#0a0a0a] text-black dark:text-neutral-100 transition-colors duration-300">
-        <ThemeProvider>
-          {children}
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              className:
-                "dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-100 bg-white border-neutral-200 text-neutral-900",
-            }}
-          />
-        </ThemeProvider>
-        
         <Script
           src="https://app.sandbox.midtrans.com/snap/snap.js"
           data-client-key={process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY}
           strategy="beforeInteractive"
+        />
+      </head>
+      <body className="min-h-full flex flex-col bg-[#0a0a0a] text-neutral-100 transition-colors duration-300">
+        {children}
+        <Toaster
+          position="bottom-right"
+          toastOptions={{
+            className:
+              "bg-neutral-900 border-neutral-800 text-neutral-100",
+          }}
         />
       </body>
     </html>

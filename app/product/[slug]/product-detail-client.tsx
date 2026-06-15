@@ -7,7 +7,6 @@ import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserProfileButton } from "@/components/user-profile-button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth-modal";
 import { toast } from "sonner";
 
@@ -124,16 +123,23 @@ export default function ProductDetailClient({
     <div className="min-h-screen">
       {/* ─── Top Navigation Bar ─── */}
       <nav className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3 sm:px-6">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400 transition-colors hover:text-black dark:hover:text-white"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to all mods
-          </Link>
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8 relative">
+          <div className="flex items-center">
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 transition-colors hover:text-black dark:hover:text-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              <span className="hidden sm:inline">Back to mods</span>
+              <span className="sm:hidden">Back</span>
+            </Link>
+          </div>
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <Link href="/" className="text-sm font-bold text-neutral-900 dark:text-white transition-colors hover:text-orange-500 dark:hover:text-orange-400">
+              Aguud Mods
+            </Link>
+          </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <UserProfileButton />
           </div>
         </div>

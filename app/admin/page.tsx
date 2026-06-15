@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { TiptapEditor } from "@/components/tiptap-editor";
 import { MediaManager } from "@/components/media-manager";
-import { ThemeToggle } from "@/components/theme-toggle";
+import { Pagination } from "@/components/ui/pagination";
 import {
   Plus,
   Pencil,
@@ -52,6 +52,8 @@ const emptyProduct = {
   files: [] as string[],
 };
 
+const ITEMS_PER_PAGE = 10;
+
 export default function AdminPage() {
   const { data: session, isPending } = useSession();
   const [products, setProducts] = useState<Product[]>([]);
@@ -60,6 +62,7 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const isAdmin =
     session && (session.user as { role?: string }).role === "admin";
@@ -69,6 +72,12 @@ export default function AdminPage() {
       fetchProducts();
     }
   }, [isAdmin]);
+
+  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -207,7 +216,6 @@ export default function AdminPage() {
               Cancel
             </Button>
             <div className="flex items-center gap-2">
-              <ThemeToggle />
               <Button
                 onClick={handleSave}
                 disabled={saving}
@@ -404,7 +412,6 @@ export default function AdminPage() {
           </Link>
           <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Admin Dashboard</h1>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <Button onClick={handleCreate} size="sm" className="gap-2">
               <Plus className="h-4 w-4" />
               New Product
@@ -438,8 +445,9 @@ export default function AdminPage() {
             </Button>
           </div>
         ) : (
-          <div className="space-y-2">
-            {products.map((product) => (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              {paginatedProducts.map((product) => (
               <div
                 key={product.id}
                 className="flex items-center justify-between rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50 px-4 py-3 transition-colors hover:bg-neutral-100 dark:hover:bg-neutral-900"
@@ -491,6 +499,17 @@ export default function AdminPage() {
                 </div>
               </div>
             ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="mt-6">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

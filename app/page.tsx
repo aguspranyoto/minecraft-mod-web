@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
 import { UserProfileButton } from "@/components/user-profile-button";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthModal } from "@/components/auth-modal";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
@@ -39,6 +38,7 @@ export default function HomePage() {
   const [subscribing, setSubscribing] = useState(false);
 
   const isLoggedIn = !!session;
+  const isAdmin = session && (session.user as { role?: string }).role === "admin";
 
   useEffect(() => {
     fetchProducts();
@@ -143,12 +143,12 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col">
       {/* ─── Top Navigation Bar ─── */}
       <nav className="fixed w-full top-0 z-50 bg-transparent">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
-          <div className="text-sm font-bold text-neutral-900 dark:text-white">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8 relative">
+          <div className="w-10"></div> {/* Spacer to balance flex-between */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-bold text-white">
             Aguud Mods
           </div>
           <div className="flex items-center gap-3">
-            <ThemeToggle />
             <UserProfileButton />
           </div>
         </div>
@@ -188,20 +188,22 @@ export default function HomePage() {
             </div>
 
             {/* Become member button */}
-            <Button
-              className="mt-4 gap-2 px-8"
-              size="lg"
-              id="become-member-button"
-              onClick={handleSubscribe}
-              disabled={subscribing}
-            >
-              {subscribing ? (
-                <span className="animate-spin">⏳</span>
-              ) : (
-                <Crown className="h-4 w-4" />
-              )}
-              {subscribing ? "Processing..." : "Become a member"}
-            </Button>
+            {!isAdmin && (
+              <Button
+                className="mt-4 gap-2 px-8"
+                size="lg"
+                id="become-member-button"
+                onClick={handleSubscribe}
+                disabled={subscribing}
+              >
+                {subscribing ? (
+                  <span className="animate-spin">⏳</span>
+                ) : (
+                  <Crown className="h-4 w-4" />
+                )}
+                {subscribing ? "Processing..." : "Become a member"}
+              </Button>
+            )}
           </div>
         </div>
       </header>
@@ -305,7 +307,7 @@ export default function HomePage() {
 
                     {/* Card content */}
                     <div className="p-3">
-                      <h3 className="line-clamp-1 text-sm font-semibold text-neutral-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
+                      <h3 className="line-clamp-1 text-sm font-semibold text-neutral-800 dark:text-neutral-100 transition-colors">
                         {product.title}
                       </h3>
                       {product.description && (
@@ -351,7 +353,7 @@ export default function HomePage() {
           © {new Date().getFullYear()} Aguud. All rights reserved.
         </div>
       </footer>
-      
+
       {/* Auth Modal */}
       <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
