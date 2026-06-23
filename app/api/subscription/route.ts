@@ -45,24 +45,23 @@ export async function POST(request: NextRequest) {
 
   const serverKey = process.env.MIDTRANS_SERVER_KEY!;
   const orderId = `sub-${session.user.id}-${Date.now()}`;
-
+  const isSandbox = serverKey.startsWith("SB-");
   try {
-    // Midtrans Snap API
-    const midtransUrl =
-      serverKey.startsWith("SB-")
-        ? "https://app.sandbox.midtrans.com/snap/v1/transactions"
-        : "https://app.midtrans.com/snap/v1/transactions";
+    const midtransUrl = isSandbox
+      ? "https://app.sandbox.midtrans.com/snap/v1/transactions"
+      : "https://app.midtrans.com/snap/v1/transactions";
 
+    const authHeader = `Basic ${Buffer.from(serverKey + ":").toString("base64")}`;
     const res = await fetch(midtransUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Basic ${Buffer.from(serverKey + ":").toString("base64")}`,
+        Authorization: authHeader,
       },
       body: JSON.stringify({
         transaction_details: {
           order_id: orderId,
-          gross_amount: 30000, // IDR 30,000 for 30-day access
+          gross_amount: 30000,
         },
         customer_details: {
           email: session.user.email,
@@ -92,6 +91,7 @@ export async function POST(request: NextRequest) {
     return Response.json({
       token: data.token,
       redirect_url: data.redirect_url,
+      orderId,
     });
   } catch (error) {
     console.error("Subscription error:", error);

@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Download, Lock, Crown, FileIcon } from "lucide-react";
+import { Download, Lock, Crown, FileIcon } from "lucide-react";
 import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { UserProfileButton } from "@/components/user-profile-button";
-import { AuthModal } from "@/components/auth-modal";
 import { toast } from "sonner";
 
 interface Product {
@@ -31,7 +29,6 @@ export default function ProductDetailClient({
   hasActiveSubscription = false,
 }: ProductDetailClientProps) {
   const { data: session } = useSession();
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [subscribing, setSubscribing] = useState(false);
 
@@ -42,7 +39,7 @@ export default function ProductDetailClient({
 
   const handleSubscribe = async () => {
     if (!isLoggedIn) {
-      setAuthModalOpen(true);
+      toast.error("Please sign in to subscribe.");
       return;
     }
 
@@ -59,8 +56,7 @@ export default function ProductDetailClient({
       if (typeof window !== "undefined" && (window as any).snap) {
         (window as any).snap.pay(data.token, {
           onSuccess: function (result: any) {
-            toast.success("Payment successful! You now have access.");
-            window.location.reload(); // Reload to get updated subscription status
+            window.location.href = "/subscription?orderId=" + encodeURIComponent(data.orderId);
           },
           onPending: function (result: any) {
             toast.info("Waiting for your payment.");
@@ -86,7 +82,7 @@ export default function ProductDetailClient({
 
   const handleDownload = async (fileUrl: string) => {
     if (!isLoggedIn) {
-      setAuthModalOpen(true);
+      toast.error("Please sign in to download.");
       return;
     }
 
@@ -121,32 +117,8 @@ export default function ProductDetailClient({
 
   return (
     <div className="min-h-screen">
-      {/* ─── Top Navigation Bar ─── */}
-      <nav className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8 relative">
-          <div className="flex items-center">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-sm font-medium text-neutral-600 dark:text-neutral-400 transition-colors hover:text-black dark:hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to mods</span>
-              <span className="sm:hidden">Back</span>
-            </Link>
-          </div>
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <Link href="/" className="text-sm font-bold text-neutral-900 dark:text-white transition-colors hover:text-orange-500 dark:hover:text-orange-400">
-              Aguud Mods
-            </Link>
-          </div>
-          <div className="flex items-center gap-3">
-            <UserProfileButton />
-          </div>
-        </div>
-      </nav>
-
       {/* ─── Product Content ─── */}
-      <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6">
+      <main className="mx-auto max-w-4xl px-4 pt-20 pb-8 sm:px-6">
         {/* Title & badge */}
         <div className="flex flex-wrap items-start gap-3">
           <h1 className="text-2xl font-bold text-neutral-900 dark:text-white sm:text-3xl">
@@ -251,10 +223,6 @@ export default function ProductDetailClient({
           </section>
         )}
       </main>
-
-      {/* Auth Modal */}
-      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
-
       {/* Footer */}
       <footer className="mt-auto border-t border-neutral-800 py-6">
         <div className="mx-auto max-w-4xl px-4 text-center text-xs text-neutral-600 sm:px-6">

@@ -84,29 +84,20 @@ export function MediaManager({
 
     for (const file of Array.from(files)) {
       try {
-        // 1. Get presigned URL
-        const res = await fetch("/api/admin/media", {
+        // Upload directly through server (avoids CORS issues on private buckets)
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("bucket", uploadBucket);
+
+        const uploadRes = await fetch("/api/admin/media/upload", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            filename: file.name,
-            contentType: file.type,
-            bucket: uploadBucket,
-          }),
+          body: formData,
         });
 
-        if (!res.ok) throw new Error("Failed to get upload URL");
+        if (!uploadRes.ok) throw new Error("Upload failed");
+        const { media: newMedia } = await uploadRes.json();
 
-        const { uploadUrl, media: newMedia } = await res.json();
-
-        // 2. Upload directly to R2
-        await fetch(uploadUrl, {
-          method: "PUT",
-          body: file,
-          headers: { "Content-Type": file.type },
-        });
-
-        // 3. Add to local state
+        // Add to local state
         setMediaFiles((prev) => [newMedia, ...prev]);
         toast.success(`Uploaded: ${file.name}`);
       } catch {
@@ -248,7 +239,7 @@ export function MediaManager({
                 >
                   {isImage(file.contentType) ? (
                     <img
-                      src={file.url}
+                      src={`/api/media/${file.id}`}
                       alt={file.filename}
                       className="h-full w-full object-cover"
                     />

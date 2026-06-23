@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Pagination } from "@/components/ui/pagination";
-import { UserProfileButton } from "@/components/user-profile-button";
-import { AuthModal } from "@/components/auth-modal";
 import { useSession } from "@/lib/auth-client";
 import { toast } from "sonner";
 
@@ -34,19 +32,25 @@ export default function HomePage() {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const [isPremium, setIsPremium] = useState(false);
 
   const isLoggedIn = !!session;
   const isAdmin = session && (session.user as { role?: string }).role === "admin";
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+    if (session?.user) {
+      fetch("/api/subscription")
+        .then((res) => res.json())
+        .then((data) => setIsPremium(data.hasActiveSubscription))
+        .catch(() => {});
+    }
+  }, [session]);
 
   const handleSubscribe = async () => {
     if (!isLoggedIn) {
-      setAuthModalOpen(true);
+      toast.error("Please sign in to become a member.");
       return;
     }
 
@@ -63,8 +67,7 @@ export default function HomePage() {
       if (typeof window !== "undefined" && (window as any).snap) {
         (window as any).snap.pay(data.token, {
           onSuccess: function (result: any) {
-            toast.success("Payment successful! You now have access.");
-            window.location.reload(); // Reload to get updated subscription status
+            window.location.href = "/subscription?orderId=" + encodeURIComponent(data.orderId);
           },
           onPending: function (result: any) {
             toast.info("Waiting for your payment.");
@@ -141,57 +144,46 @@ export default function HomePage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      {/* ─── Top Navigation Bar ─── */}
-      <nav className="fixed w-full top-0 z-50 bg-transparent">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8 relative">
-          <div className="w-10"></div> {/* Spacer to balance flex-between */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-sm font-bold text-white">
-            Aguud Mods
-          </div>
-          <div className="flex items-center gap-3">
-            <UserProfileButton />
-          </div>
-        </div>
-      </nav>
-
-      {/* ─── Hero Section (Patreon-style) ─── */}
-      <header className="relative">
+      {/* ─── Hero Section ─── */}
+      <header className="relative pt-14">
         {/* Banner */}
-        <div className="relative h-48 overflow-hidden sm:h-64 md:h-72 lg:h-80">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/30 via-amber-600/20 to-neutral-200 dark:to-neutral-900" />
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-50" />
+        <div className="relative h-36 overflow-hidden sm:h-48 md:h-56">
+          <div className="absolute inset-0 bg-gradient-to-b from-orange-600/10 via-amber-600/5 to-transparent" />
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iZ3JpZCIgd2lkdGg9IjIwIiBoZWlnaHQ9IjIwIiBwYXR0ZXJuVW5pdHM9InVzZXJTcGFjZU9uVXNlIj48cGF0aCBkPSJNIDIwIDAgTCAwIDAgMCAyMCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSJyZ2JhKDI1NSwyNTUsMjU1LDAuMDMpIiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+          {/* Fade to background */}
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
         </div>
 
         {/* Profile section */}
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <div className="-mt-16 flex flex-col items-center sm:-mt-20">
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center text-center">
             {/* Avatar */}
             <div className="relative">
-              <div className="h-28 w-28 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 p-1 shadow-2xl shadow-orange-500/20 sm:h-32 sm:w-32">
-                <div className="flex h-full w-full items-center justify-center rounded-full bg-white dark:bg-neutral-900 text-4xl font-bold text-orange-400">
+              <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 p-0.5 shadow-xl shadow-orange-500/20">
+                <div className="flex h-full w-full items-center justify-center rounded-2xl bg-neutral-900 text-2xl font-bold text-orange-400">
                   A
                 </div>
               </div>
             </div>
 
             {/* Creator info */}
-            <h1 className="mt-4 text-2xl font-bold text-foreground sm:text-3xl">
+            <h1 className="mt-4 text-xl font-bold text-neutral-100 sm:text-2xl">
               Aguud
             </h1>
-            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-              Premium Minecraft Mods
+            <p className="mt-1 text-sm text-neutral-500">
+              Premium Minecraft Mods &middot; Java Edition
             </p>
-            <div className="mt-2 flex items-center gap-3 text-xs text-neutral-500">
+            <div className="mt-2 flex items-center gap-3 text-xs text-neutral-600">
               <span>{products.length} mods</span>
-              <span>•</span>
-              <span>Java Edition</span>
+              <span className="h-0.5 w-0.5 rounded-full bg-neutral-700" />
+              <span>Active since 2024</span>
             </div>
 
-            {/* Become member button */}
-            {!isAdmin && (
+            {/* Become member CTA */}
+            {!isAdmin && !isPremium && (
               <Button
-                className="mt-4 gap-2 px-8"
-                size="lg"
+                className="mt-4 gap-2 rounded-full px-6 bg-orange-600 text-white hover:bg-orange-500 shadow-lg shadow-orange-500/20"
+                size="sm"
                 id="become-member-button"
                 onClick={handleSubscribe}
                 disabled={subscribing}
@@ -199,7 +191,7 @@ export default function HomePage() {
                 {subscribing ? (
                   <span className="animate-spin">⏳</span>
                 ) : (
-                  <Crown className="h-4 w-4" />
+                  <Crown className="h-3.5 w-3.5" />
                 )}
                 {subscribing ? "Processing..." : "Become a member"}
               </Button>
@@ -209,7 +201,7 @@ export default function HomePage() {
       </header>
 
       {/* ─── Filter & Search Section ─── */}
-      <section className="mx-auto mt-10 w-full max-w-5xl px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto mt-10 w-full max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center gap-3">
           {/* Filter buttons */}
           <div className="flex items-center gap-2">
@@ -246,7 +238,7 @@ export default function HomePage() {
       </section>
 
       {/* ─── Product Grid ─── */}
-      <section className="mx-auto mt-8 w-full max-w-5xl flex-1 px-4 sm:px-6 lg:px-8">
+      <section className="mx-auto mt-8 w-full max-w-6xl flex-1 px-4 sm:px-6 lg:px-8">
         {loading ? (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -349,13 +341,10 @@ export default function HomePage() {
 
       {/* ─── Footer ─── */}
       <footer className="border-t border-neutral-800 py-6">
-        <div className="mx-auto max-w-5xl px-4 text-center text-xs text-neutral-600 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-6xl px-4 text-center text-xs text-neutral-600 sm:px-6 lg:px-8">
           © {new Date().getFullYear()} Aguud. All rights reserved.
         </div>
       </footer>
-
-      {/* Auth Modal */}
-      <AuthModal open={authModalOpen} onOpenChange={setAuthModalOpen} />
     </div>
   );
 }

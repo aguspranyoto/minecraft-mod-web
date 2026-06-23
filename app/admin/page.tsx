@@ -173,7 +173,7 @@ export default function AdminPage() {
   // Auth guard
   if (isPending) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center pt-14">
         <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
       </div>
     );
@@ -181,7 +181,7 @@ export default function AdminPage() {
 
   if (!session || !isAdmin) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 pt-14">
         <div className="text-6xl">🔒</div>
         <h1 className="text-xl font-bold text-white">Access Denied</h1>
         <p className="text-sm text-neutral-500">
@@ -200,10 +200,10 @@ export default function AdminPage() {
   // ─── Product Editor View ─────────────────────────────────────
   if (editingProduct) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background pt-14">
         {/* Top bar */}
-        <div className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+        <div className="border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Button
               variant="ghost"
               onClick={() => {
@@ -232,7 +232,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl space-y-6 px-4 py-8">
+        <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
           {/* Title */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-neutral-300">
@@ -399,17 +399,10 @@ export default function AdminPage() {
 
   // ─── Product List View ───────────────────────────────────────
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-14">
       {/* Top bar */}
-      <div className="sticky top-0 z-40 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Site
-          </Link>
+      <div className="border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
           <h1 className="text-lg font-semibold text-neutral-900 dark:text-white">Admin Dashboard</h1>
           <div className="flex items-center gap-3">
             <Button onClick={handleCreate} size="sm" className="gap-2">
@@ -420,7 +413,7 @@ export default function AdminPage() {
         </div>
       </div>
 
-      <div className="mx-auto max-w-5xl px-4 py-8">
+      <div className="mx-auto max-w-6xl px-4 py-8">
         {loading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
