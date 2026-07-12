@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
   }
 
   const serverKey = process.env.MIDTRANS_SERVER_KEY!;
+  const subscriptionPrice = parseInt(process.env.SUBSCRIPTION_PRICE || "10000", 10);
   const orderId = `sub-${session.user.id}-${Date.now()}`;
   const isSandbox = serverKey.startsWith("SB-");
   try {
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         transaction_details: {
           order_id: orderId,
-          gross_amount: 30000,
+          gross_amount: subscriptionPrice,
         },
         customer_details: {
           email: session.user.email,
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
         item_details: [
           {
             id: "premium-30d",
-            price: 30000,
+            price: subscriptionPrice,
             quantity: 1,
             name: "Premium Access (30 Days)",
           },
