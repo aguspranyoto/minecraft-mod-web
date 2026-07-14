@@ -35,7 +35,7 @@ export default function ProductDetailClient({
   const isLoggedIn = !!session;
 
   const canDownload =
-    isLoggedIn && (!product.isPremium || hasActiveSubscription);
+    !product.isPremium || (isLoggedIn && hasActiveSubscription);
 
   const handleSubscribe = async () => {
     if (!isLoggedIn) {
@@ -81,8 +81,8 @@ export default function ProductDetailClient({
   };
 
   const handleDownload = async (fileUrl: string) => {
-    if (!isLoggedIn) {
-      toast.error("Please sign in to download.");
+    if (product.isPremium && !isLoggedIn) {
+      toast.error("Please sign in to subscribe.");
       return;
     }
 
@@ -200,7 +200,7 @@ export default function ProductDetailClient({
                       <span className="animate-spin">⏳</span>
                     ) : subscribing && product.isPremium && !hasActiveSubscription ? (
                       <span className="animate-spin">⏳</span>
-                    ) : !isLoggedIn ? (
+                    ) : product.isPremium && !isLoggedIn ? (
                       <>
                         <Lock className="mr-1 h-3 w-3" />
                         Sign in

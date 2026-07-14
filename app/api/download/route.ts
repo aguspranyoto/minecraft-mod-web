@@ -7,13 +7,6 @@ import { eq, and, gt, sql } from "drizzle-orm";
 import type { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user?.id) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const file = request.nextUrl.searchParams.get("file");
   if (!file) {
@@ -30,6 +23,14 @@ export async function GET(request: NextRequest) {
 
   // If the file belongs to a premium product, check subscription
   if (isPremiumFile) {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    if (!session?.user?.id) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const activeSub = await db
       .select()
       .from(subscriptions)

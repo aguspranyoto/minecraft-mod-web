@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
   }
 
   const serverKey = process.env.MIDTRANS_SERVER_KEY!;
-  const subscriptionPrice = parseInt(process.env.SUBSCRIPTION_PRICE || "10000", 10);
+  const subscriptionPrice = parseInt(process.env.SUBSCRIPTION_PRICE || "1000", 10);
   const orderId = `sub-${session.user.id}-${Date.now()}`;
   const isSandbox = serverKey.startsWith("SB-");
   try {
